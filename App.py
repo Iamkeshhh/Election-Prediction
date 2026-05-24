@@ -248,4 +248,4 @@ st.write("---")
 
 st.subheader("Election Dataset Preview")
 
-st.dataframe(df.head(20))
+st.dataframe(df.head(4258))
