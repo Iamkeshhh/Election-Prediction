@@ -1,195 +1,175 @@
+import streamlit as st
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import LabelEncoder
-from sklearn.metrics import accuracy_score
-from sklearn.metrics import confusion_matrix
-from sklearn.metrics import classification_report
-from sklearn.preprocessing import StandardScaler
-from sklearn.linear_model import LogisticRegression
-from sklearn.linear_model import LogisticRegression
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.ensemble import RandomForestClassifier
-from xgboost import XGBClassifier
-from sklearn.metrics import accuracy_score
-df = pd.read_csv('indian-national-level-election.csv')
-print(df.head())
-print(df.shape)
-print(df.columns)
-#Create Winner Column
-# Find maximum votes in each constituency
-max_votes = df.groupby(['year', 'pc_name'])['totvotpoll'].transform('max')
+import joblib
 
-# Create winner column
-df['winner'] = np.where(df['totvotpoll'] == max_votes, 1, 0)
+# Load files
 
-print(df[['cand_name', 'totvotpoll', 'winner']].head())
-#Handle Missing Values
-print(df.isnull().sum())
+model = joblib.load('election_prediction_model.pkl')
+label_encoders = joblib.load('label_encoders.pkl')
 
-# Remove missing values if any
-df.dropna(inplace=True)
-#Encode Categorical Data
-label_encoder = LabelEncoder()
+# Load dataset
 
-categorical_columns = ['st_name', 'pc_name', 'pc_type',
-                       'cand_name', 'cand_sex',
-                       'partyname', 'partyabbre']
+df = pd.read_csv('eci_results_tamilnadu_2026.csv')
 
-for col in categorical_columns:
-    df[col] = label_encoder.fit_transform(df[col])
-    #Feature Selection
-X = df[['st_name', 'year', 'pc_no', 'pc_name',
-        'pc_type', 'cand_sex', 'partyname',
-        'partyabbre', 'totvotpoll', 'electors']]
+# Page Config
 
-y = df['winner']
-#Train Test Split
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y,
-    test_size=0.2,
-    random_state=42
-)
-#Logistic Regression Model
-from sklearn.preprocessing import StandardScaler
-from sklearn.linear_model import LogisticRegression
-
-scaler = StandardScaler()
-
-X_train_scaled = scaler.fit_transform(X_train)
-X_test_scaled = scaler.transform(X_test)
-
-lr_model = LogisticRegression(
-    max_iter=5000,
-    solver='lbfgs'
-)
-lr_model.fit(X_train_scaled, y_train)
-
-lr_pred = lr_model.predict(X_test_scaled)
-
-from sklearn.metrics import accuracy_score
-
-print("Logistic Regression Accuracy:",
-      accuracy_score(y_test, lr_pred))
-#Decision Tree Model
-dt_model = DecisionTreeClassifier()
-
-dt_model.fit(X_train, y_train)
-
-dt_pred = dt_model.predict(X_test)
-
-print('Decision Tree Accuracy:',
-      accuracy_score(y_test, dt_pred))
-#Random Forest Model
-rf_model = RandomForestClassifier(
-    n_estimators=100,
-    random_state=42
+st.set_page_config(
+    page_title='Tamil Nadu Election Prediction',
+    page_icon='🗳️',
+    layout='wide'
 )
 
-rf_model.fit(X_train, y_train)
+# Custom CSS
 
-rf_pred = rf_model.predict(X_test)
+st.markdown(
+    """
+    <style>
 
-print('Random Forest Accuracy:',
-      accuracy_score(y_test, rf_pred))
-#Model Comparison
-models = ['Logistic Regression', 'Decision Tree', 'Random Forest']
-accuracies = [
-    accuracy_score(y_test, lr_pred),
-    accuracy_score(y_test, dt_pred),
-    accuracy_score(y_test, rf_pred)
-]
+    .main {
+        background-color: #f5f7fa;
+    }
 
-comparison = pd.DataFrame({
-    'Model': models,
-    'Accuracy': accuracies
-})
+    .title {
+        text-align: center;
+        color: #800000;
+        font-size: 45px;
+        font-weight: bold;
+    }
 
-print(comparison)
-xgb_model = XGBClassifier(
-    n_estimators=100,
-    learning_rate=0.1,
-    max_depth=6,
-    random_state=42
+    .sub {
+        text-align: center;
+        color: #444;
+        font-size: 20px;
+    }
+
+    .stButton>button {
+        background-color: #800000;
+        color: white;
+        font-size: 20px;
+        border-radius: 10px;
+        width: 100%;
+        height: 55px;
+    }
+
+    </style>
+    """,
+    unsafe_allow_html=True
 )
 
-# Train Model
-xgb_model.fit(X_train, y_train)
+# Title
 
-# Prediction
-xgb_pred = xgb_model.predict(X_test)
+st.markdown('<div class="title">Tamil Nadu Election Prediction System</div>', unsafe_allow_html=True)
+st.markdown('<div class="sub">Machine Learning Based Election Winner Prediction</div>', unsafe_allow_html=True)
 
-# Accuracy
-print("XGBoost Accuracy:",
-      accuracy_score(y_test, xgb_pred))
-#Confusion Matrix
-cm = confusion_matrix(y_test, rf_pred)
+st.write('---')
 
-plt.figure(figsize=(6,4))
-sns.heatmap(cm, annot=True, fmt='d')
-plt.title('Confusion Matrix')
-plt.xlabel('Predicted')
-plt.ylabel('Actual')
-plt.show()
-#Classification Report
-print(classification_report(y_test, rf_pred))
-#Feature Importance
-importance = rf_model.feature_importances_
+# Sidebar
 
-feature_names = X.columns
+st.sidebar.header('Election Analysis Dashboard')
 
-feature_df = pd.DataFrame({
-    'Feature': feature_names,
-    'Importance': importance
-})
+# Dropdown Values
 
-feature_df = feature_df.sort_values(by='Importance', ascending=False)
+constituency_list = sorted(df['Constituency'].unique())
+party_list = sorted(df['Party'].unique())
+candidate_list = sorted(df['Candidate'].unique())
 
-print(feature_df)
-#Classification Report
-print(classification_report(y_test, rf_pred))
-#Votes Distribution
-plt.figure(figsize=(10,5))
-sns.histplot(df['totvotpoll'], bins=30)
-plt.title('Votes Distribution')
-plt.show()
-#Gender Distribution
-sns.countplot(x='cand_sex', data=df)
-plt.title('Candidate Gender Distribution')
-plt.show()
-#Winners vs Losers
-sns.countplot(x='winner', data=df)
-plt.title('Winner vs Loser')
-plt.show()
-sample_input = pd.DataFrame([[
-    1,      # st_name
-    2014,   # year
-    10,     # pc_no
-    50,     # pc_name
-    1,      # pc_type
-    1,      # cand_sex
-    20,     # partyname
-    20,     # partyabbre
-    500000, # totvotpoll
-    1000000 # electors
-]], columns=[
-    'st_name',
-    'year',
-    'pc_no',
-    'pc_name',
-    'pc_type',
-    'cand_sex',
-    'partyname',
-    'partyabbre',
-    'totvotpoll',
-    'electors'
-])
+# Layout
 
-prediction = rf_model.predict(sample_input)
+col1, col2 = st.columns(2)
 
-if prediction[0] == 1:
-    print("Predicted Result: Winner")
-else:
-    print("Predicted Result: Loser")
+with col1:
+
+    constituency = st.selectbox(
+        'Select Constituency',
+        constituency_list
+    )
+
+    candidate = st.selectbox(
+        'Select Candidate',
+        candidate_list
+    )
+
+    party = st.selectbox(
+        'Select Party',
+        party_list
+    )
+
+with col2:
+
+    evm_votes = st.number_input(
+        'EVM Votes',
+        min_value=0,
+        value=50000
+    )
+
+    postal_votes = st.number_input(
+        'Postal Votes',
+        min_value=0,
+        value=500
+    )
+
+    total_votes = st.number_input(
+        'Total Votes',
+        min_value=0,
+        value=50500
+    )
+
+    percentage_votes = st.slider(
+        'Percentage Votes',
+        0.0,
+        100.0,
+        45.0
+    )
+
+# Encode Inputs
+
+constituency_encoded = label_encoders['Constituency'].transform([constituency])[0]
+candidate_encoded = label_encoders['Candidate'].transform([candidate])[0]
+party_encoded = label_encoders['Party'].transform([party])[0]
+
+# Prediction Button
+
+if st.button('Predict Election Result'):
+
+    input_data = np.array([[
+        constituency_encoded,
+        candidate_encoded,
+        party_encoded,
+        evm_votes,
+        postal_votes,
+        total_votes,
+        percentage_votes
+    ]])
+
+    prediction = model.predict(input_data)[0]
+
+    probability = model.predict_proba(input_data)[0][1] * 100
+
+    st.write('---')
+
+    if prediction == 1:
+
+        st.success(f'''✅ {candidate} from {party} is likely to WIN the next election.''')
+
+        st.metric(
+            label='Winning Probability',
+            value=f'{probability:.2f}%'
+        )
+
+    else:
+
+        st.error(f'''❌ {candidate} from {party} is likely to LOSE the next election.''')
+
+        st.metric(
+            label='Winning Probability',
+            value=f'{probability:.2f}%'
+        )
+
+# Dataset Preview
+
+st.write('---')
+
+st.subheader('Election Dataset Preview')
+
+st.dataframe(df.head(20))
