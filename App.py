@@ -371,6 +371,20 @@ if st.button("Predict Next Election Result"):
         f"{probability:.2f}%"
     )
 
+st.markdown(f"""
+<div style="
+background:gold;
+padding:20px;
+border-radius:20px;
+text-align:center;
+font-size:35px;
+font-weight:bold;
+color:black;">
+🏆 {winner_candidate}
+<br>
+{winner_party}
+</div>
+""", unsafe_allow_html=True)
 
 # ---------------- DATASET PREVIEW ----------------
 
