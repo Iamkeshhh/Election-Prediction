@@ -1,13 +1,10 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.linear_model import LogisticRegression
-from sklearn.preprocessing import StandardScaler
-from sklearn.tree import DecisionTreeClassifier
-from xgboost import XGBClassifier
 
 # ---------------------------------------------------
 # PAGE CONFIG
@@ -24,14 +21,6 @@ st.set_page_config(
 st.markdown("""
 <style>
 
-.main {
-    background-color: #0f172a;
-}
-
-h1, h2, h3 {
-    color: white;
-}
-
 .stApp {
     background: linear-gradient(to right, #0f172a, #1e293b);
 }
@@ -39,7 +28,7 @@ h1, h2, h3 {
 .big-font {
     font-size:55px !important;
     font-weight: bold;
-    color: #ffffff;
+    color: white;
     text-align: center;
 }
 
@@ -53,24 +42,25 @@ h1, h2, h3 {
     background-color: #1e293b;
     padding: 30px;
     border-radius: 20px;
-    box-shadow: 0px 0px 15px rgba(255,255,255,0.1);
+    box-shadow: 0px 0px 20px rgba(255,255,255,0.1);
 }
 
 .prediction-box {
     background-color: #111827;
-    padding: 20px;
-    border-radius: 15px;
+    padding: 25px;
+    border-radius: 20px;
     text-align: center;
     color: white;
-    font-size: 30px;
+    font-size: 32px;
     font-weight: bold;
+    margin-top: 20px;
 }
 
 </style>
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------
-# HEADER
+# TITLE
 # ---------------------------------------------------
 st.markdown(
     '<p class="big-font">🗳️ Election Prediction System</p>',
@@ -78,7 +68,7 @@ st.markdown(
 )
 
 st.markdown(
-    '<p class="sub-font">AI Powered Election Winner Prediction Web App</p>',
+    '<p class="sub-font">AI Powered Election Winner Prediction</p>',
     unsafe_allow_html=True
 )
 
@@ -120,14 +110,18 @@ if uploaded_file is not None:
     df.dropna(inplace=True)
 
     # ---------------------------------------------------
-    # ENCODING
+    # SAVE ORIGINAL VALUES
     # ---------------------------------------------------
-    encoder = LabelEncoder()
+    original_df = df.copy()
+
+    # ---------------------------------------------------
+    # LABEL ENCODING
+    # ---------------------------------------------------
+    encoder_dict = {}
 
     categorical_columns = [
         'st_name',
         'pc_name',
-        'pc_type',
         'cand_name',
         'cand_sex',
         'partyname',
@@ -135,8 +129,12 @@ if uploaded_file is not None:
     ]
 
     for col in categorical_columns:
-        if col in df.columns:
-            df[col] = encoder.fit_transform(df[col])
+
+        encoder = LabelEncoder()
+
+        df[col] = encoder.fit_transform(df[col])
+
+        encoder_dict[col] = encoder
 
     # ---------------------------------------------------
     # FEATURES
@@ -147,7 +145,7 @@ if uploaded_file is not None:
             'year',
             'pc_no',
             'pc_name',
-            'pc_type',
+            'cand_name',
             'cand_sex',
             'partyname',
             'partyabbre',
@@ -169,48 +167,11 @@ if uploaded_file is not None:
     )
 
     # ---------------------------------------------------
-    # MODEL SELECTION
+    # MODEL TRAINING
     # ---------------------------------------------------
-    model_choice = st.sidebar.selectbox(
-        "🤖 Select Prediction Model",
-        [
-            "Random Forest",
-            "Decision Tree",
-            "Logistic Regression",
-            "XGBoost"
-        ]
-    )
+    model = RandomForestClassifier()
 
-    # ---------------------------------------------------
-    # TRAIN MODEL
-    # ---------------------------------------------------
-    if model_choice == "Random Forest":
-
-        model = RandomForestClassifier()
-
-        model.fit(X_train, y_train)
-
-    elif model_choice == "Decision Tree":
-
-        model = DecisionTreeClassifier()
-
-        model.fit(X_train, y_train)
-
-    elif model_choice == "Logistic Regression":
-
-        scaler = StandardScaler()
-
-        X_train = scaler.fit_transform(X_train)
-
-        model = LogisticRegression(max_iter=5000)
-
-        model.fit(X_train, y_train)
-
-    else:
-
-        model = XGBClassifier()
-
-        model.fit(X_train, y_train)
+    model.fit(X_train, y_train)
 
     # ---------------------------------------------------
     # USER INPUT SECTION
@@ -220,91 +181,124 @@ if uploaded_file is not None:
         unsafe_allow_html=True
     )
 
-    st.subheader("🧠 Enter Candidate Details")
+    st.subheader("🧠 Candidate Information Form")
 
     col1, col2 = st.columns(2)
 
+    # ---------------------------------------------------
+    # COLUMN 1
+    # ---------------------------------------------------
     with col1:
 
-        st_name = st.number_input(
-            "🏛️ State Code",
-            min_value=0
+        st_name_option = st.selectbox(
+            "🏛️ State Name",
+            original_df['st_name'].unique()
         )
 
-        year = st.number_input(
+        year_option = st.selectbox(
             "📅 Election Year",
-            min_value=2000,
-            max_value=2100
+            sorted(original_df['year'].unique())
         )
 
-        pc_no = st.number_input(
+        pc_no_option = st.selectbox(
             "🗺️ Constituency Number",
-            min_value=0
+            sorted(original_df['pc_no'].unique())
         )
 
-        pc_name = st.number_input(
-            "📍 Constituency Code",
-            min_value=0
+        pc_name_option = st.selectbox(
+            "📍 Constituency Name",
+            original_df['pc_name'].unique()
         )
 
-        pc_type = st.number_input(
-            "🏷️ PC Type",
-            min_value=0
+        cand_name_option = st.selectbox(
+            "👤 Candidate Name",
+            original_df['cand_name'].unique()
         )
 
+    # ---------------------------------------------------
+    # COLUMN 2
+    # ---------------------------------------------------
     with col2:
 
-        cand_sex = st.selectbox(
-            "👤 Candidate Gender",
-            [0, 1]
+        cand_sex_option = st.selectbox(
+            "⚧ Candidate Gender",
+            original_df['cand_sex'].unique()
         )
 
-        partyname = st.number_input(
-            "🎉 Party Code",
-            min_value=0
+        partyname_option = st.selectbox(
+            "🎉 Party Name",
+            original_df['partyname'].unique()
         )
 
-        partyabbre = st.number_input(
-            "🔠 Party Abbreviation Code",
-            min_value=0
+        partyabbre_option = st.selectbox(
+            "🔠 Party Abbreviation",
+            original_df['partyabbre'].unique()
         )
 
-        totvotpoll = st.number_input(
+        totvotpoll_option = st.number_input(
             "🗳️ Total Votes Polled",
-            min_value=0
+            min_value=0,
+            step=1000
         )
 
-        electors = st.number_input(
+        electors_option = st.number_input(
             "👥 Total Electors",
-            min_value=0
+            min_value=0,
+            step=1000
         )
 
     st.write("")
 
     # ---------------------------------------------------
-    # PREDICTION BUTTON
+    # PREDICT BUTTON
     # ---------------------------------------------------
     if st.button("🚀 Predict Election Result"):
 
+        # Encode Inputs
+        st_name_encoded = encoder_dict['st_name'].transform(
+            [st_name_option]
+        )[0]
+
+        pc_name_encoded = encoder_dict['pc_name'].transform(
+            [pc_name_option]
+        )[0]
+
+        cand_name_encoded = encoder_dict['cand_name'].transform(
+            [cand_name_option]
+        )[0]
+
+        cand_sex_encoded = encoder_dict['cand_sex'].transform(
+            [cand_sex_option]
+        )[0]
+
+        partyname_encoded = encoder_dict['partyname'].transform(
+            [partyname_option]
+        )[0]
+
+        partyabbre_encoded = encoder_dict['partyabbre'].transform(
+            [partyabbre_option]
+        )[0]
+
+        # Create Input DataFrame
         sample_input = pd.DataFrame(
             [[
-                st_name,
-                year,
-                pc_no,
-                pc_name,
-                pc_type,
-                cand_sex,
-                partyname,
-                partyabbre,
-                totvotpoll,
-                electors
+                st_name_encoded,
+                year_option,
+                pc_no_option,
+                pc_name_encoded,
+                cand_name_encoded,
+                cand_sex_encoded,
+                partyname_encoded,
+                partyabbre_encoded,
+                totvotpoll_option,
+                electors_option
             ]],
             columns=[
                 'st_name',
                 'year',
                 'pc_no',
                 'pc_name',
-                'pc_type',
+                'cand_name',
                 'cand_sex',
                 'partyname',
                 'partyabbre',
@@ -313,18 +307,8 @@ if uploaded_file is not None:
             ]
         )
 
-        # Logistic Regression Scaling
-        if model_choice == "Logistic Regression":
-
-            sample_input = scaler.transform(
-                sample_input
-            )
-
-        prediction = model.predict(
-            sample_input
-        )
-
-        st.write("")
+        # Prediction
+        prediction = model.predict(sample_input)
 
         # ---------------------------------------------------
         # OUTPUT
@@ -356,17 +340,20 @@ if uploaded_file is not None:
     st.markdown("</div>", unsafe_allow_html=True)
 
 # ---------------------------------------------------
-# NO FILE MESSAGE
+# NO FILE
 # ---------------------------------------------------
 else:
 
     st.markdown("""
     <div class="card">
     <h2 style='text-align:center; color:white;'>
-    📂 Upload your Election Dataset CSV File
+    📂 Upload Election Dataset CSV File
     </h2>
+
     <p style='text-align:center; color:#cbd5e1;'>
-    Start predicting election winners using AI & Machine Learning.
+    Predict election winners using Artificial Intelligence
+    and Machine Learning.
     </p>
+
     </div>
     """, unsafe_allow_html=True)
