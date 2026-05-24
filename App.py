@@ -61,11 +61,96 @@ st.markdown("""
 
 # ---------------- TITLE ----------------
 
-st.markdown("<div class='title'>Tamil Nadu Election Prediction System</div>", unsafe_allow_html=True)
+st.markdown("""
+<div class='title'>
+🗳️ Tamil Nadu Election Prediction System
+</div>
 
-st.markdown("<div class='subtitle'>Machine Learning Based Election Prediction Dashboard</div>", unsafe_allow_html=True)
+<div class='subtitle'>
+Machine Learning Based Election Prediction Dashboard
+</div>
+""", unsafe_allow_html=True)
 
 st.write("---")
+
+import base64
+
+# Background Video
+video_file = open("CM.mp4", "rb")
+video_bytes = video_file.read()
+video_base64 = base64.b64encode(video_bytes).decode()
+
+st.markdown(
+    f"""
+    <style>
+
+    /* Full-screen background video */
+    #bg-video {{
+        position: fixed;
+        right: 0;
+        bottom: 0;
+        min-width: 100%;
+        min-height: 100%;
+        object-fit: cover;
+        z-index: -1;
+        opacity: 0.35;   /* adjust visibility */
+    }}
+
+    /* Transparent overlay for readability */
+    .overlay {{
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.25);
+        z-index: -1;
+    }}
+
+    /* Main content styling */
+    .main {{
+        background: transparent;
+    }}
+
+    .title {{
+        text-align:center;
+        font-size:55px;
+        font-weight:bold;
+        color:white;
+        text-shadow:3px 3px 10px black;
+        margin-top:20px;
+    }}
+
+    .subtitle {{
+        text-align:center;
+        font-size:24px;
+        color:#f8f9fa;
+        text-shadow:2px 2px 8px black;
+    }}
+
+    div[data-testid="stMetric"] {{
+        background: rgba(255,255,255,0.85);
+        padding: 15px;
+        border-radius: 15px;
+        box-shadow: 0px 4px 12px rgba(0,0,0,0.3);
+    }}
+
+    div[data-testid="stDataFrame"] {{
+        background: rgba(255,255,255,0.92);
+        border-radius: 15px;
+    }}
+
+    </style>
+
+    <video autoplay muted loop id="bg-video">
+        <source src="data:video/mp4;base64,{video_base64}" type="video/mp4">
+    </video>
+
+    <div class="overlay"></div>
+
+    """,
+    unsafe_allow_html=True
+)
 
 # ---------------- CONSTITUENCY DROPDOWN ----------------
 
@@ -74,6 +159,78 @@ constituencies = sorted(df['Constituency'].unique())
 selected_constituency = st.selectbox(
     "Select Constituency",
     constituencies
+)
+
+st.markdown("""
+<style>
+
+.party-logo {
+    width:120px;
+    height:120px;
+    animation: float 3s ease-in-out infinite;
+    filter: drop-shadow(0px 0px 15px gold);
+}
+
+@keyframes float {
+    0% {
+        transform: translateY(0px) rotate(0deg);
+    }
+    50% {
+        transform: translateY(-15px) rotate(5deg);
+    }
+    100% {
+        transform: translateY(0px) rotate(0deg);
+    }
+}
+
+.winner-container{
+    text-align:center;
+    margin-top:20px;
+    margin-bottom:20px;
+}
+
+.winner-text{
+    font-size:32px;
+    font-weight:bold;
+    color:white;
+    text-shadow:2px 2px 10px black;
+}
+
+</style>
+""", unsafe_allow_html=True)
+
+logo_path = ""
+
+if winner_party == "Tamilaga Vettri Kazhagam":
+    logo_path = "tvk_logo.png"
+
+elif winner_party == "Dravida Munnetra Kazhagam":
+    logo_path = "dmk_logo.png"
+
+elif winner_party == "All India Anna Dravida Munnetra Kazhagam":
+    logo_path = "aiadmk_logo.png"
+
+import base64
+
+with open(logo_path, "rb") as image_file:
+    encoded = base64.b64encode(image_file.read()).decode()
+
+st.markdown(
+    f"""
+    <div class="winner-container">
+
+        <img class="party-logo"
+             src="data:image/png;base64,{encoded}">
+
+        <div class="winner-text">
+            🏆 WINNER PARTY
+            <br>
+            {winner_party}
+        </div>
+
+    </div>
+    """,
+    unsafe_allow_html=True
 )
 
 # ---------------- FIND WINNER ----------------
@@ -210,6 +367,34 @@ if video_path:
         height=500
     )
 
+.party-logo{
+    width:140px;
+    height:140px;
+    animation:
+        spin 10s linear infinite,
+        glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes spin{
+    from{
+        transform:rotate(0deg);
+    }
+    to{
+        transform:rotate(360deg);
+    }
+}
+
+@keyframes glow{
+    from{
+        filter:
+        drop-shadow(0px 0px 10px gold);
+    }
+
+    to{
+        filter:
+        drop-shadow(0px 0px 35px gold);
+    }
+}
 # ---------------- ALL CONTESTED CANDIDATES ----------------
 
 st.subheader("All Contested Candidates")
