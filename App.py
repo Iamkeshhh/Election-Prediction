@@ -371,20 +371,54 @@ if st.button("Predict Next Election Result"):
         f"{probability:.2f}%"
     )
 
-st.markdown(f"""
-<div style="
-background:gold;
-padding:20px;
-border-radius:20px;
-text-align:center;
-font-size:35px;
-font-weight:bold;
-color:black;">
-🏆 {winner_candidate}
-<br>
-{winner_party}
-</div>
-""", unsafe_allow_html=True)
+top10 = df.sort_values(
+    by='Total Votes',
+    ascending=False
+).head(10)
+
+st.subheader("Top 10 Candidates")
+
+st.dataframe(top10)
+
+sorted_votes = constituency_data[
+    'Total Votes'
+].sort_values(
+    ascending=False
+)
+
+margin = sorted_votes.iloc[0] - sorted_votes.iloc[1]
+
+st.metric(
+    "Victory Margin",
+    f"{margin:,}"
+)
+
+st.markdown("""
+<marquee
+behavior="scroll"
+direction="left"
+scrollamount="10">
+
+🏆 TVK Leading |
+🔥 DMK Gains Momentum |
+📊 AIADMK Strong Competition |
+🗳️ Election Prediction System Live
+
+</marquee>
+""",
+unsafe_allow_html=True)
+
+csv = constituency_data.to_csv(
+    index=False
+)
+
+st.download_button(
+    "Download Report",
+    csv,
+    file_name=
+    f"{selected_constituency}.csv",
+    mime="text/csv"
+)
 
 # ---------------- DATASET PREVIEW ----------------
 
