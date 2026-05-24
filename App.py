@@ -3,173 +3,171 @@ import pandas as pd
 import numpy as np
 import joblib
 
-# Load files
-
-model = joblib.load('election_prediction_model.pkl')
-label_encoders = joblib.load('label_encoders.pkl')
-
 # Load dataset
+df = pd.read_csv("eci_results_tamilnadu_2026.csv")
 
-df = pd.read_csv('eci_results_tamilnadu_2026.csv')
+# Load model and encoders
+model = joblib.load("election_prediction_model.pkl")
+label_encoders = joblib.load("label_encoders.pkl")
 
-# Page Config
+# ---------------- PAGE CONFIG ----------------
 
 st.set_page_config(
-    page_title='Tamil Nadu Election Prediction',
-    page_icon='🗳️',
-    layout='wide'
+    page_title="Tamil Nadu Election Prediction",
+    page_icon="🗳️",
+    layout="wide"
 )
 
-# Custom CSS
+# ---------------- CUSTOM CSS ----------------
 
-st.markdown(
-    """
-    <style>
+st.markdown("""
+<style>
 
-    .main {
-        background-color: #f5f7fa;
-    }
+.main {
+    background-color: #f5f7fa;
+}
 
-    .title {
-        text-align: center;
-        color: #800000;
-        font-size: 45px;
-        font-weight: bold;
-    }
+.title {
+    text-align: center;
+    font-size: 45px;
+    font-weight: bold;
+    color: #800000;
+}
 
-    .sub {
-        text-align: center;
-        color: #444;
-        font-size: 20px;
-    }
+.subtitle {
+    text-align: center;
+    font-size: 20px;
+    color: gray;
+}
 
-    .stButton>button {
-        background-color: #800000;
-        color: white;
-        font-size: 20px;
-        border-radius: 10px;
-        width: 100%;
-        height: 55px;
-    }
+.result-box {
+    padding: 20px;
+    border-radius: 15px;
+    background-color: white;
+    box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
+}
 
-    </style>
-    """,
-    unsafe_allow_html=True
+.stButton>button {
+    width: 100%;
+    height: 55px;
+    border-radius: 10px;
+    background-color: #800000;
+    color: white;
+    font-size: 20px;
+}
+
+</style>
+""", unsafe_allow_html=True)
+
+# ---------------- TITLE ----------------
+
+st.markdown("<div class='title'>Tamil Nadu Election Prediction System</div>", unsafe_allow_html=True)
+
+st.markdown("<div class='subtitle'>Machine Learning Based Election Prediction Dashboard</div>", unsafe_allow_html=True)
+
+st.write("---")
+
+# ---------------- CONSTITUENCY DROPDOWN ----------------
+
+constituencies = sorted(df['Constituency'].unique())
+
+selected_constituency = st.selectbox(
+    "Select Constituency",
+    constituencies
 )
 
-# Title
+# ---------------- FIND WINNER ----------------
 
-st.markdown('<div class="title">Tamil Nadu Election Prediction System</div>', unsafe_allow_html=True)
-st.markdown('<div class="sub">Machine Learning Based Election Winner Prediction</div>', unsafe_allow_html=True)
+constituency_data = df[df['Constituency'] == selected_constituency]
 
-st.write('---')
+winner_row = constituency_data.loc[
+    constituency_data['Total Votes'].idxmax()
+]
 
-# Sidebar
+winner_candidate = winner_row['Candidate']
+winner_party = winner_row['Party']
+winner_votes = winner_row['Total Votes']
+winner_percentage = winner_row['% Votes']
 
-st.sidebar.header('Election Analysis Dashboard')
+# ---------------- SHOW WINNER DETAILS ----------------
 
-# Dropdown Values
+st.subheader("Current Election Winner")
 
-constituency_list = sorted(df['Constituency'].unique())
-party_list = sorted(df['Party'].unique())
-candidate_list = sorted(df['Candidate'].unique())
+col1, col2, col3, col4 = st.columns(4)
 
-# Layout
+col1.metric("Winning Candidate", winner_candidate)
 
-col1, col2 = st.columns(2)
+col2.metric("Party", winner_party)
 
-with col1:
+col3.metric("Total Votes", int(winner_votes))
 
-    constituency = st.selectbox(
-        'Select Constituency',
-        constituency_list
-    )
+col4.metric("Vote Percentage", f"{winner_percentage}%")
 
-    candidate = st.selectbox(
-        'Select Candidate',
-        candidate_list
-    )
+st.write("---")
 
-    party = st.selectbox(
-        'Select Party',
-        party_list
-    )
+# ---------------- NEXT ELECTION PREDICTION ----------------
 
-with col2:
+st.subheader("Next Election Prediction")
 
-    evm_votes = st.number_input(
-        'EVM Votes',
-        min_value=0,
-        value=50000
-    )
+# Encode input values
 
-    postal_votes = st.number_input(
-        'Postal Votes',
-        min_value=0,
-        value=500
-    )
+constituency_encoded = label_encoders['Constituency'].transform(
+    [winner_row['Constituency']]
+)[0]
 
-    total_votes = st.number_input(
-        'Total Votes',
-        min_value=0,
-        value=50500
-    )
+candidate_encoded = label_encoders['Candidate'].transform(
+    [winner_candidate]
+)[0]
 
-    percentage_votes = st.slider(
-        'Percentage Votes',
-        0.0,
-        100.0,
-        45.0
-    )
+party_encoded = label_encoders['Party'].transform(
+    [winner_party]
+)[0]
 
-# Encode Inputs
+# Create Input Data
 
-constituency_encoded = label_encoders['Constituency'].transform([constituency])[0]
-candidate_encoded = label_encoders['Candidate'].transform([candidate])[0]
-party_encoded = label_encoders['Party'].transform([party])[0]
+input_data = np.array([[
 
-# Prediction Button
+    constituency_encoded,
+    candidate_encoded,
+    party_encoded,
+    winner_row['EVM Votes'],
+    winner_row['Postal Votes'],
+    winner_row['Total Votes'],
+    winner_row['% Votes']
 
-if st.button('Predict Election Result'):
+]])
 
-    input_data = np.array([[
-        constituency_encoded,
-        candidate_encoded,
-        party_encoded,
-        evm_votes,
-        postal_votes,
-        total_votes,
-        percentage_votes
-    ]])
+# Predict Button
+
+if st.button("Predict Next Election Result"):
 
     prediction = model.predict(input_data)[0]
 
     probability = model.predict_proba(input_data)[0][1] * 100
 
-    st.write('---')
+    st.write("---")
 
     if prediction == 1:
 
-        st.success(f'''✅ {candidate} from {party} is likely to WIN the next election.''')
-
-        st.metric(
-            label='Winning Probability',
-            value=f'{probability:.2f}%'
+        st.success(
+            f"✅ {winner_candidate} from {winner_party} is likely to WIN the next election."
         )
 
     else:
 
-        st.error(f'''❌ {candidate} from {party} is likely to LOSE the next election.''')
-
-        st.metric(
-            label='Winning Probability',
-            value=f'{probability:.2f}%'
+        st.error(
+            f"❌ {winner_candidate} from {winner_party} is likely to LOSE the next election."
         )
 
-# Dataset Preview
+    st.metric(
+        "Winning Probability",
+        f"{probability:.2f}%"
+    )
 
-st.write('---')
+# ---------------- DATASET PREVIEW ----------------
 
-st.subheader('Election Dataset Preview')
+st.write("---")
+
+st.subheader("Election Dataset Preview")
 
 st.dataframe(df.head(20))
