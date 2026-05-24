@@ -63,7 +63,7 @@ import streamlit as st
 
 # ---------------- HEADER VIDEO ----------------
 
-video_file = open("CM(1).mp4", "rb")
+video_file = open("CM.mp4", "rb")
 video_bytes = video_file.read()
 
 st.markdown(
@@ -87,7 +87,7 @@ st.markdown('</div>', unsafe_allow_html=True)
 
 import base64
 
-with open("CM(1).mp4", "rb") as f:
+with open("CM.mp4", "rb") as f:
     video_bytes = f.read()
 
 video_base64 = base64.b64encode(video_bytes).decode()
