@@ -207,7 +207,7 @@ if video_path:
 
     st.components.v1.html(
         video_html,
-        height=100
+        height=500
     )
 
 # ---------------- ALL CONTESTED CANDIDATES ----------------
