@@ -341,6 +341,8 @@ if video_path:
     video_base64 = base64.b64encode(video_bytes).decode()
 
     # Custom HTML Video
+if video_path:
+
     video_html = f"""
     <video id="winnerVideo"
            width="100%"
@@ -362,37 +364,37 @@ if video_path:
     </script>
     """
 
-   st.markdown("""
-<style>
+    st.markdown("""
+    <style>
 
-.party-logo{
-    width:140px;
-    height:140px;
-    animation:
-        spin 10s linear infinite,
-        glow 2s ease-in-out infinite alternate;
-}
+    .party-logo{
+        width:140px;
+        height:140px;
+        animation:
+            spin 10s linear infinite,
+            glow 2s ease-in-out infinite alternate;
+    }
 
-@keyframes spin{
-    from{
-        transform:rotate(0deg);
+    @keyframes spin{
+        from{
+            transform:rotate(0deg);
+        }
+        to{
+            transform:rotate(360deg);
+        }
     }
-    to{
-        transform:rotate(360deg);
-    }
-}
 
-@keyframes glow{
-    from{
-        filter:drop-shadow(0px 0px 10px gold);
+    @keyframes glow{
+        from{
+            filter:drop-shadow(0px 0px 10px gold);
+        }
+        to{
+            filter:drop-shadow(0px 0px 35px gold);
+        }
     }
-    to{
-        filter:drop-shadow(0px 0px 35px gold);
-    }
-}
 
-</style>
-""", unsafe_allow_html=True)
+    </style>
+    """, unsafe_allow_html=True)
 # ---------------- ALL CONTESTED CANDIDATES ----------------
 
 st.subheader("All Contested Candidates")
