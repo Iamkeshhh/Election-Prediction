@@ -89,7 +89,6 @@ winner_party = winner_row['Party']
 winner_votes = winner_row['Total Votes']
 winner_percentage = winner_row['% Votes']
 
-# ---------------- SHOW WINNER DETAILS ----------------
 
 # ---------------- CONSTITUENCY RESULTS ----------------
 
