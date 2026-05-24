@@ -376,23 +376,6 @@ top10 = df.sort_values(
     ascending=False
 ).head(10)
 
-st.subheader("Top 10 Candidates")
-
-st.dataframe(top10)
-
-sorted_votes = constituency_data[
-    'Total Votes'
-].sort_values(
-    ascending=False
-)
-
-margin = sorted_votes.iloc[0] - sorted_votes.iloc[1]
-
-st.metric(
-    "Victory Margin",
-    f"{margin:,}"
-)
-
 st.markdown("""
 <marquee
 behavior="scroll"
