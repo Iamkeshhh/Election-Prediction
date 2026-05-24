@@ -300,7 +300,75 @@ st.write("---")
 
 # ---------------- WINNER VIDEO ----------------
 
+import base64
 
+# ---------------- WINNER VIDEO ----------------
+
+st.write("---")
+st.subheader("🏆 Winner Celebration")
+
+video_path = None
+
+if winner_party == "Tamilaga Vettri Kazhagam":
+    video_path = "Vijay.mp4"
+
+elif winner_party == "Dravida Munnetra Kazhagam":
+    video_path = "videoplayback (1).mp4"
+
+elif winner_party == "All India Anna Dravida Munnetra Kazhagam":
+    video_path = "Edappadi.mp4"
+
+if video_path:
+
+    # Winner Tag
+    st.markdown(
+        f"""
+        <div style="
+            background-color:#28a745;
+            color:white;
+            padding:15px;
+            border-radius:10px;
+            text-align:center;
+            font-size:24px;
+            font-weight:bold;">
+            🏆 WINNER : {winner_candidate} ({winner_party})
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    # Read video
+    video_file = open(video_path, "rb")
+    video_bytes = video_file.read()
+
+    video_base64 = base64.b64encode(video_bytes).decode()
+
+    # Custom HTML Video
+    video_html = f"""
+    <video id="winnerVideo"
+           width="100%"
+           autoplay
+           muted
+           playsinline>
+        <source src="data:video/mp4;base64,{video_base64}"
+                type="video/mp4">
+    </video>
+
+    <script>
+        var video = document.getElementById("winnerVideo");
+
+        video.muted = true;
+
+        setTimeout(function(){{
+            video.pause();
+        }}, 10000);
+    </script>
+    """
+
+    st.components.v1.html(
+        video_html,
+        height=500
+    )
 
 # ---------------- NEXT ELECTION PREDICTION ----------------
 
