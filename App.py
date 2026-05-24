@@ -150,13 +150,13 @@ st.subheader("🏆 Winner Celebration")
 video_path = None
 
 if winner_party == "Tamilaga Vettri Kazhagam":
-    video_path = "videoplayback (4).mp4"
+    video_path = "Vijay.mp4"
 
 elif winner_party == "Dravida Munnetra Kazhagam":
     video_path = "videoplayback (1).mp4"
 
 elif winner_party == "All India Anna Dravida Munnetra Kazhagam":
-    video_path = "videoplayback (5).mp4"
+    video_path = "Edappadi.mp4"
 
 if video_path:
 
