@@ -59,13 +59,96 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+import base64
+
+# Background Video
+video_file = open("CM.mp4", "rb")
+video_bytes = video_file.read()
+video_base64 = base64.b64encode(video_bytes).decode()
+
+st.markdown(
+    f"""
+    <style>
+
+    /* Full-screen background video */
+    #bg-video {{
+        position: fixed;
+        right: 0;
+        bottom: 0;
+        min-width: 100%;
+        min-height: 100%;
+        object-fit: cover;
+        z-index: -1;
+        opacity: 0.35;   /* adjust visibility */
+    }}
+
+    /* Transparent overlay for readability */
+    .overlay {{
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.25);
+        z-index: -1;
+    }}
+
+    /* Main content styling */
+    .main {{
+        background: transparent;
+    }}
+
+    .title {{
+        text-align:center;
+        font-size:55px;
+        font-weight:bold;
+        color:white;
+        text-shadow:3px 3px 10px black;
+        margin-top:20px;
+    }}
+
+    .subtitle {{
+        text-align:center;
+        font-size:24px;
+        color:#f8f9fa;
+        text-shadow:2px 2px 8px black;
+    }}
+
+    div[data-testid="stMetric"] {{
+        background: rgba(255,255,255,0.85);
+        padding: 15px;
+        border-radius: 15px;
+        box-shadow: 0px 4px 12px rgba(0,0,0,0.3);
+    }}
+
+    div[data-testid="stDataFrame"] {{
+        background: rgba(255,255,255,0.92);
+        border-radius: 15px;
+    }}
+
+    </style>
+
+    <video autoplay muted loop id="bg-video">
+        <source src="data:video/mp4;base64,{video_base64}" type="video/mp4">
+    </video>
+
+    <div class="overlay"></div>
+
+    """,
+    unsafe_allow_html=True
+)
+
 # ---------------- TITLE ----------------
 
-st.markdown("<div class='title'>Tamil Nadu Election Prediction System</div>", unsafe_allow_html=True)
+st.markdown("""
+<div class='title'>
+🗳️ Tamil Nadu Election Prediction System
+</div>
 
-st.markdown("<div class='subtitle'>Machine Learning Based Election Prediction Dashboard</div>", unsafe_allow_html=True)
-
-st.write("---")
+<div class='subtitle'>
+Machine Learning Based Election Prediction Dashboard
+</div>
+""", unsafe_allow_html=True)
 
 # ---------------- CONSTITUENCY DROPDOWN ----------------
 
@@ -252,6 +335,26 @@ st.dataframe(
 )
 
 st.write("---")
+
+st.markdown(
+    f"""
+    <div style="
+        background:linear-gradient(90deg,#ff9933,#ffffff,#138808);
+        color:black;
+        padding:20px;
+        border-radius:20px;
+        text-align:center;
+        font-size:30px;
+        font-weight:bold;
+        box-shadow:0px 5px 20px rgba(0,0,0,0.3);
+        margin-bottom:20px;">
+        🏆 WINNER : {winner_candidate}
+        <br>
+        🎉 PARTY : {winner_party}
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
 # ---------------- NEXT ELECTION PREDICTION ----------------
 
