@@ -59,6 +59,67 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+import streamlit as st
+
+# ---------------- HEADER VIDEO ----------------
+
+video_file = open("CM(1).mp4", "rb")
+video_bytes = video_file.read()
+
+st.markdown(
+    """
+    <style>
+    .video-container {
+        border-radius: 15px;
+        overflow: hidden;
+        margin-bottom: 20px;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+st.markdown('<div class="video-container">', unsafe_allow_html=True)
+
+st.video(video_bytes)
+
+st.markdown('</div>', unsafe_allow_html=True)
+
+import base64
+
+with open("CM(1).mp4", "rb") as f:
+    video_bytes = f.read()
+
+video_base64 = base64.b64encode(video_bytes).decode()
+
+st.markdown(
+    f"""
+    <div style="
+        width:100%;
+        display:flex;
+        justify-content:center;
+        margin-bottom:20px;
+    ">
+        <video
+            autoplay
+            muted
+            loop
+            playsinline
+            style="
+                width:100%;
+                max-width:1200px;
+                border-radius:20px;
+                box-shadow:0px 4px 15px rgba(0,0,0,0.3);
+            ">
+            <source
+                src="data:video/mp4;base64,{video_base64}"
+                type="video/mp4">
+        </video>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
 # ---------------- TITLE ----------------
 
 st.markdown("""
