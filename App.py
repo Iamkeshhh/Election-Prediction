@@ -362,10 +362,8 @@ if video_path:
     </script>
     """
 
-    st.components.v1.html(
-        video_html,
-        height=500
-    )
+   st.markdown("""
+<style>
 
 .party-logo{
     width:140px;
@@ -386,15 +384,15 @@ if video_path:
 
 @keyframes glow{
     from{
-        filter:
-        drop-shadow(0px 0px 10px gold);
+        filter:drop-shadow(0px 0px 10px gold);
     }
-
     to{
-        filter:
-        drop-shadow(0px 0px 35px gold);
+        filter:drop-shadow(0px 0px 35px gold);
     }
 }
+
+</style>
+""", unsafe_allow_html=True)
 # ---------------- ALL CONTESTED CANDIDATES ----------------
 
 st.subheader("All Contested Candidates")
