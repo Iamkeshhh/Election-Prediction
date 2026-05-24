@@ -403,68 +403,18 @@ st.download_button(
     mime="text/csv"
 )
 
-st.markdown("""
-<style>
+sorted_votes = constituency_data[
+    'Total Votes'
+].sort_values(
+    ascending=False
+)
 
-.glass-card{
-    background: rgba(255,255,255,0.15);
-    backdrop-filter: blur(15px);
-    border-radius:20px;
-    padding:20px;
-    border:1px solid rgba(255,255,255,0.3);
-    box-shadow:0 8px 32px rgba(0,0,0,0.2);
-    color:white;
-    text-align:center;
-}
+margin = sorted_votes.iloc[0] - sorted_votes.iloc[1]
 
-</style>
-""", unsafe_allow_html=True)
-
-st.markdown(f"""
-<div class="glass-card">
-<h2>🏆 {winner_candidate}</h2>
-<h3>{winner_party}</h3>
-<p>{winner_votes:,} Votes</p>
-</div>
-""", unsafe_allow_html=True)
-st.markdown("""
-<style>
-
-.particle{
-    position:fixed;
-    width:8px;
-    height:8px;
-    background:white;
-    border-radius:50%;
-    animation:float 10s infinite;
-}
-
-@keyframes float{
-    0%{
-        transform:translateY(100vh);
-        opacity:0;
-    }
-    100%{
-        transform:translateY(-100px);
-        opacity:1;
-    }
-}
-
-</style>
-
-<div class="particle"
-style="left:10%;animation-delay:0s"></div>
-
-<div class="particle"
-style="left:30%;animation-delay:2s"></div>
-
-<div class="particle"
-style="left:60%;animation-delay:4s"></div>
-
-<div class="particle"
-style="left:80%;animation-delay:6s"></div>
-
-""", unsafe_allow_html=True)
+st.metric(
+    "Victory Margin",
+    f"{margin:,}"
+)
 # ---------------- DATASET PREVIEW ----------------
 
 st.write("---")
