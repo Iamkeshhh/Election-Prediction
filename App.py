@@ -91,17 +91,96 @@ winner_percentage = winner_row['% Votes']
 
 # ---------------- SHOW WINNER DETAILS ----------------
 
-st.subheader("Current Election Winner")
+# ---------------- CONSTITUENCY RESULTS ----------------
+
+st.subheader(f"Election Results - {selected_constituency}")
+
+# Sort by total votes descending
+constituency_data = constituency_data.sort_values(
+    by='Total Votes',
+    ascending=False
+)
+
+# Winner Row
+winner_row = constituency_data.iloc[0]
+
+winner_candidate = winner_row['Candidate']
+winner_party = winner_row['Party']
+winner_votes = winner_row['Total Votes']
+winner_percentage = winner_row['% Votes']
+
+# ---------------- WINNER CARD ----------------
+
+st.success(
+    f"🏆 Winner: {winner_candidate} ({winner_party})"
+)
+
+# Metrics
 
 col1, col2, col3, col4 = st.columns(4)
 
-col1.metric("Winning Candidate", winner_candidate)
+col1.metric(
+    "Winning Candidate",
+    winner_candidate
+)
 
-col2.metric("Party", winner_party)
+col2.metric(
+    "Party",
+    winner_party
+)
 
-col3.metric("Total Votes", int(winner_votes))
+col3.metric(
+    "Total Votes",
+    int(winner_votes)
+)
 
-col4.metric("Vote Percentage", f"{winner_percentage}%")
+col4.metric(
+    "Vote %",
+    f"{winner_percentage}%"
+)
+
+st.write("---")
+
+# ---------------- ALL CONTESTED CANDIDATES ----------------
+
+st.subheader("All Contested Candidates")
+
+display_df = constituency_data[[
+    'Candidate',
+    'Party',
+    'Total Votes',
+    '% Votes'
+]]
+
+display_df = display_df.reset_index(drop=True)
+
+display_df.index = display_df.index + 1
+
+display_df.columns = [
+    'Candidate Name',
+    'Party',
+    'Total Votes',
+    'Vote Percentage'
+]
+
+# Highlight winner row
+
+def highlight_winner(row):
+
+    if row['Candidate Name'] == winner_candidate:
+        return ['background-color: #90EE90'] * len(row)
+
+    return [''] * len(row)
+
+styled_df = display_df.style.apply(
+    highlight_winner,
+    axis=1
+)
+
+st.dataframe(
+    styled_df,
+    use_container_width=True
+)
 
 st.write("---")
 
